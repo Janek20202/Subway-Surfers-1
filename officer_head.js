@@ -69,7 +69,7 @@ let officer_head = class {
 		else
 		{
 			if(this.pos[1] > p.pos[1] - 10)
-				this.pos[1] -= 2*frame_speed * deltaTime - frame_speed/20;
+				this.pos[1] += 2*frame_speed * deltaTime - frame_speed/20;
 			else
 				this.pos[1] = p.pos[1] - 10;
 		}

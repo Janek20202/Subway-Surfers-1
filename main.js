@@ -17,6 +17,7 @@ var o_leg2;
 var d_body;
 var d_legs;
 var d_tail;
+var game_won;
 var t = [];
 var walls = [];
 var train_tops = [];
@@ -34,7 +35,7 @@ var magnets = [];
 var fr = 0.5;
 var progress;
 var start = 5;
-var end = 200;
+var end = 750;
 var done = 0;
 var frame_speed = 5;
 var frame_accel = 0.5;
@@ -102,6 +103,7 @@ function draw(gl, programInfo, lightProgramInfo, deltaTime) {
 
     p_body.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
     p_head.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
+    game_won.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
     if(p_body.jet <= 0 && !p_body.duck)
     {
         p_hand1.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
@@ -178,6 +180,9 @@ function main() {
     d_body = new dog_body(gl, [0, 5, groundPos+0.6], 'dog.jpg');
     d_legs = new dog_legs(gl, [0, 5, groundPos+0.6], 'dog.jpg');
     d_tail = new dog_tail(gl, [0, 5-1, groundPos+0.6-0.2], 'dog.jpg');
+    game_won = new game_over(gl, [0, end, 0], 'won.jpeg');
+
+    var i,j;
 
     for(i=0;i<50;i++)
         t.push(new track(gl, [0, 5.0 + trackLen * i, groundPos], 'track.jpeg'));
@@ -191,30 +196,98 @@ function main() {
     for(i=0;i<50;i++)
         walls.push(new wall(gl, [6.0, 5.0 + trackLen * i, 7 + groundPos], 'wall.jpg'));
 
-    // train_fronts.push(new train_front(gl, [0, 33, groundPos + train_ht/2], 'train.jpeg', train_len, train_wid, train_ht));
-    // train_fronts.push(new train_front(gl, [0, 33 + train_len, groundPos + train_ht/2], 'train.jpeg', train_len, train_wid, train_ht));
-    // for(i=0;i<5;i++)
-    // {
-    //     train_sides.push(new train_side(gl, [-train_wid/2 + 0.2, 33 + train_len/2 + i*train_len, groundPos + train_ht/2], 'train.jpeg', train_len, train_wid, train_ht))
-    //     train_sides.push(new train_side(gl, [train_wid/2 - 0.1, 33 + train_len/2 + i*train_len, groundPos + train_ht/2], 'train.jpeg', train_len, train_wid, train_ht))
-    // }
-    // for(i=0;i<5;i++)
-    //     train_tops.push(new train_top(gl, [0, 33+train_len/2 + i*train_len, groundPos + train_ht], 'train_top.jpeg', train_len, train_wid, train_ht));
+    y_pos = 100;
+    for(i=0;i<20;i++)
+    {
+        a = Math.round(Math.random() * 3) % 3;
+        a--;
+        train_fronts.push(new train_front(gl, [a * trackWid, y_pos, groundPos + train_ht/2], 'train.jpeg', train_len, train_wid, train_ht));
+        train_fronts.push(new train_front(gl, [a * trackWid, y_pos + train_len, groundPos + train_ht/2], 'train.jpeg', train_len, train_wid, train_ht));
+        for(j=0;j<5;j++)
+        {
+            train_sides.push(new train_side(gl, [-train_wid/2 + 0.2 + a * trackWid, y_pos + train_len/2 + j*train_len, groundPos + train_ht/2], 'train.jpeg', train_len, train_wid, train_ht))
+            train_sides.push(new train_side(gl, [train_wid/2 - 0.1 + a * trackWid, y_pos + train_len/2 + j*train_len, groundPos + train_ht/2], 'train.jpeg', train_len, train_wid, train_ht))
+        }
+        for(j=0;j<5;j++)
+            train_tops.push(new train_top(gl, [a * trackWid, y_pos+train_len/2 + j*train_len, groundPos + train_ht], 'train_top.jpeg', train_len, train_wid, train_ht));
+        for(j=0;j<15;j++)
+        {
+            coins.push(new coin(gl, [a * trackWid, y_pos + j, groundPos + 4], 'coin.jpeg'));
+            coins[coins.length - 1].vely = -15;
+        }
+        y_pos += 100;
+    }
+    y_pos = 35;
+    for(i=0;i<12;i++)
+    {
+        a = Math.round(Math.random() * 2) % 2;
+        if(a==0)
+            a=-1;
+        obstacles11.push(new obstacle11(gl, [a * 2, y_pos, groundPos + 2.5], 'obstacle11.jpeg'));
+        y_pos += 70;
+    }
 
-    coins.push(new coin(gl, [-4,40,-1], 'coin.jpeg'));
+    y_pos = 59;
+    for(i=0;i<15;i++)
+    {
+        a = Math.round(Math.random() * 3) % 3;
+        a--;
+        obstacles12.push(new obstacle12(gl, [a * trackWid, y_pos, groundPos + 2.0], 'obstacle12.jpg'));
+        obstacles12.push(new obstacle12_base(gl, [a * trackWid - 1.25, y_pos, groundPos + 1.0], 'obstacle12.jpg'));
+        obstacles12.push(new obstacle12_base(gl, [a * trackWid + 1.25, y_pos, groundPos + 1.0], 'obstacle12.jpg'));
+        for(j=-5;j<=5;j++)
+        {
+            coins.push(new coin(gl, [a * trackWid,y_pos + j,-2.5], 'coin.jpeg'));
+        }
+        y_pos += 59;
+    }
 
+    y_pos = 43;
+    for(i=0;i<20;i++)
+    {
+        a = Math.round(Math.random() * 3) % 3;
+        a--;
+        if((i%2)==0)
+        {
+            obstacles21.push(new obstacle21(gl, [a * trackWid, y_pos, groundPos + 0.15], 'obstacle21.jpeg'));
+            y_pos += 43;
+        }
+        else
+        {
+            obstacles22.push(new obstacle22(gl, [a * trackWid, y_pos, groundPos + 0.15], 'obstacle22.jpeg'));
+            y_pos += 49;
+        }
+    }
 
-    // obstacles11.push(new obstacle11(gl, [2, 30, groundPos + 2.5], 'obstacle11.jpeg'));
-    obstacles12.push(new obstacle12(gl, [0, 30, groundPos + 2.0], 'obstacle12.jpg'));
-    obstacles12.push(new obstacle12_base(gl, [-1.25, 30, groundPos + 1.0], 'obstacle12.jpg'));
-    obstacles12.push(new obstacle12_base(gl, [1.25, 30, groundPos + 1.0], 'obstacle12.jpg'));
-    // obstacles21.push(new obstacle21(gl, [0, 40, groundPos + 0.15], 'obstacle21.jpeg'));
-    // obstacles22.push(new obstacle22(gl, [0, 30, groundPos + 0.15], 'obstacle22.jpeg'));
-    // jetpacks.push(new jetpack(gl, [0, 30, groundPos + 0.5], 'jetpack.jpeg'));
-    // jumping_boots.push(new jumping_boot(gl, [-0.2, 40, groundPos + 0.5], 'jumping_boot.jpg', true));
-    // jumping_boots.push(new jumping_boot(gl, [0.12, 40, groundPos + 0.2], 'jumping_boot.jpg', false));
-    magnets.push(new magnet(gl, [0, 40, groundPos + 0.8], 'magnet.jpeg'));
+    y_pos = 61;
+    for(i=0;i<10;i++)
+    {
+        a = Math.round(Math.random() * 3) % 3;
+        a--;
+        if(i%3==0)
+            magnets.push(new magnet(gl, [a * trackWid, y_pos, groundPos + 0.8], 'magnet.jpeg'));
+        else if(i%3==1)
+        {
+            jetpacks.push(new jetpack(gl, [a * trackWid, y_pos, groundPos + 0.5], 'jetpack.jpeg'));
+            for(j=frame_speed;j<12 * frame_speed;j++)
+            {
+                if(j%10==0)
+                {
+                    a = Math.round(Math.random() * 3) % 3;
+                    a--;
+                }
+                coins.push(new coin(gl, [a * trackWid,y_pos + j, 10], 'coin.jpeg'));
+            }
+        }
+        else
+        {
+            jumping_boots.push(new jumping_boot(gl, [a * trackWid - 0.2, y_pos, groundPos + 0.5], 'jumping_boot.jpg', true));
+            jumping_boots.push(new jumping_boot(gl, [a * trackWid + 0.12, y_pos, groundPos + 0.2], 'jumping_boot.jpg', false));
+        }
+        y_pos += 109;
+    }
 
+    // coins.push(new coin(gl, [-4,40,-1], 'coin.jpeg'));
     // If we don't have a GL context, give up now
 	if (!gl) {
     	alert('Unable to initialize WebGL. Your browser or machine may not support it.');
@@ -235,9 +308,10 @@ function main() {
 
 	// Draw the scene repeatedly
 	function render(now) {
+    console.log(p_body.magnet);
     progress = (p_body.pos[1] - start)*100 / end;
     progress = Math.round(progress);
-    document.getElementById("progress").innerHTML = progress + " %";
+    document.getElementById("progress").innerText = progress + " %";
     document.getElementById("progress").setAttribute("style", "width:"+String(progress) + "%");
 
     if(progress == 100)
@@ -309,6 +383,12 @@ function tick(deltaTime) {
 
     for(i=0;i<coins.length;i++)
         coins[i].tick(deltaTime);
+    for(i=0;i<train_fronts.length;i++)
+        train_fronts[i].tick(deltaTime);
+    for(i=0;i<train_tops.length;i++)
+        train_tops[i].tick(deltaTime);
+    for(i=0;i<train_sides.length;i++)
+        train_sides[i].tick(deltaTime);
     if(p_body.magnet > 0)
     {
         for(i=0;i<coins.length;i++)
@@ -316,9 +396,9 @@ function tick(deltaTime) {
             var d = dist(coins[i].pos, p_body.pos);
             if(d <= 8)
             {
-                coins[i].velx = 16*(p_body.pos[0] - coins[i].pos[0])/d;
-                coins[i].vely = 16*(p_body.pos[1] - coins[i].pos[1])/d;
-                coins[i].velz = 16*(p_body.pos[2] - coins[i].pos[2])/d;
+                coins[i].velx = frame_speed*2*(p_body.pos[0] - coins[i].pos[0])/d;
+                coins[i].vely = frame_speed*2*(p_body.pos[1] - coins[i].pos[1])/d;
+                coins[i].velz = frame_speed*2*(p_body.pos[2] - coins[i].pos[2])/d;
             }
         }
     }
@@ -338,10 +418,6 @@ function dist(pos1, pos2) {
 function detect_collisions() {
 
     plBx = createBoundingBox(p_body.pos[0], p_body.pos[1], p_body.pos[2] - 0.375, 1, 1, 2.25);
-    if(p_body.duck)
-    {
-        plBx = createBoundingBox(p_body.pos[0], -p_body.pos[2]+0.375, p_body.pos[1], 1, 2.25, 1);
-    }
 
     for(i=0;i<coins.length;i++)
     {
@@ -356,13 +432,13 @@ function detect_collisions() {
     for(i=0;i<train_fronts.length;i++)
     {
         trBx = createBoundingBox(train_fronts[i].pos[0], train_fronts[i].pos[1], train_fronts[i].pos[2], 3, 0.1, 3);
-        if(detect_collision(plBx, trBx))
+        if(detect_collision(plBx, trBx) && p_body.jet <= 0)
             p_body.dead = true;
     }
     for(i=0;i<train_tops.length;i++)
     {
         trBx = createBoundingBox(train_tops[i].pos[0], train_tops[i].pos[1], train_tops[i].pos[2], 3, 3, 0.1);
-        if(detect_collision(plBx, trBx))
+        if(detect_collision(plBx, trBx) && p_body.jet <= 0)
         {
             p_body.gravity = false;
             p_head.gravity = false;
@@ -380,7 +456,7 @@ function detect_collisions() {
                 p_leg2.vel = 0;
             }
         }
-        else
+        else if(!detect_collision(plBx, trBx))
         {
             p_body.gravity = true;
             p_head.gravity = true;
@@ -394,7 +470,7 @@ function detect_collisions() {
     for(i=0;i<train_sides.length;i++)
     {
         trBx = createBoundingBox(train_sides[i].pos[0], train_sides[i].pos[1], train_sides[i].pos[2], 0.1, 3, 3);
-        if(detect_collision(plBx, trBx))
+        if(detect_collision(plBx, trBx) && p_body.jet <= 0)
         {
             if(p_body.slow <= 0)
             {
@@ -496,29 +572,25 @@ function detect_collisions() {
     for(i=0;i<obstacles11.length;i++)
     {
         obBx = createBoundingBox(obstacles11[i].pos[0], obstacles11[i].pos[1], obstacles11[i].pos[2], 6, 0.2, 5);
-        if(detect_collision(plBx, obBx))
-            p_body.dead = true;
-    }
-
-    for(i=0;i<obstacles12.length;i++)
-    {
-        if(i%3==0)
-            obBx = createBoundingBox(obstacles12[i].pos[0], obstacles12[i].pos[1], obstacles12[i].pos[2], 2.5, 0.2, 0.5);
-        else
-            obBx = createBoundingBox(obstacles12[i].pos[0], obstacles12[i].pos[1], obstacles12[i].pos[2], 0.5, 0.2, 2.5);
-        if(detect_collision(plBx, obBx))
+        if(detect_collision(plBx, obBx) && p_body.jet <= 0)
             p_body.dead = true;
     }
 
     for(i=0;i<obstacles21.length;i++)
     {
         obBx = createBoundingBox(obstacles21[i].pos[0], obstacles21[i].pos[1], obstacles21[i].pos[2], 2, 0.2, 0.3);
-        if(detect_collision(plBx, obBx))
+        if(detect_collision(plBx, obBx) && p_body.jet <= 0)
         {
             if(p_body.slow <= 0)
             {
                 p_body.slow = slowTime;
                 frame_speed = fr * frame_speed;
+                p_body.pos[1] += 1.5;
+                p_hand1.pos[1] += 1.5;
+                p_hand2.pos[1] += 1.5;
+                p_head.pos[1] += 1.5;
+                p_leg1.pos[1] += 1.5;
+                p_leg2.pos[1] += 1.5;
             }
             else
                 p_body.dead = true;
@@ -528,12 +600,18 @@ function detect_collisions() {
     for(i=0;i<obstacles22.length;i++)
     {
         obBx = createBoundingBox(obstacles22[i].pos[0], obstacles22[i].pos[1], obstacles22[i].pos[2], 2, 2, 0.3);
-        if(detect_collision(plBx, obBx))
+        if(detect_collision(plBx, obBx) && p_body.jet <= 0)
         {
             if(p_body.slow <= 0)
             {
                 p_body.slow = slowTime;
                 frame_speed = fr * frame_speed;
+                p_body.pos[1] += 3.5;
+                p_hand1.pos[1] += 3.5;
+                p_hand2.pos[1] += 3.5;
+                p_head.pos[1] += 3.5;
+                p_leg1.pos[1] += 3.5;
+                p_leg2.pos[1] += 3.5;
             }
             else
                 p_body.dead = true;
@@ -545,12 +623,18 @@ function detect_collisions() {
         jtBx = createBoundingBox(jetpacks[i].pos[0], jetpacks[i].pos[1], jetpacks[i].pos[2], 0.6, 0.6, 1.5);
         if(detect_collision(plBx, jtBx))
         {
-            p_body.jet = 10;
-            p_head.jet = 10;
-            p_hand1.jet = 10;
-            p_hand2.jet = 10;
-            p_leg1.jet = 10;
-            p_leg2.jet = 10;
+            p_body.jet = 5;
+            p_head.jet = 5;
+            p_hand1.jet = 5;
+            p_hand2.jet = 5;
+            p_leg1.jet = 5;
+            p_leg2.jet = 5;
+            p_body.rotation = 0;
+            p_head.rotation = 0;
+            p_hand1.rotation = 0;
+            p_hand2.rotation = 0;
+            p_leg1.rotation = 0;
+            p_leg2.rotation = 0;
             p_body.slow = 0;
             jetpacks.splice(i, 1);
         }
@@ -586,10 +670,24 @@ function detect_collisions() {
             magnets.splice(i, 1);
         }
     }
+
+    for(i=0;i<obstacles12.length;i++)
+    {
+        if(p_body.duck)
+            plBx = createBoundingBox(p_body.pos[0], -p_body.pos[2]+0.375, p_body.pos[1], 1, 2.25, 1);
+        if(i%3==0)
+            obBx = createBoundingBox(obstacles12[i].pos[0], obstacles12[i].pos[1], obstacles12[i].pos[2], 2.5, 0.2, 0.5);
+        else
+            obBx = createBoundingBox(obstacles12[i].pos[0], obstacles12[i].pos[1], obstacles12[i].pos[2], 0.5, 0.2, 2.5);
+        if(detect_collision(plBx, obBx) && p_body.jet <= 0)
+            p_body.dead = true;
+    }
 }
 
 function key_bindings(){
     Mousetrap.bind('left', function() {
+        if(p_body.right == -1 && p_body.jet > 0)
+            return;
         var vel = -10;
         p_body.velx = vel;
         p_head.velx = vel;
@@ -605,6 +703,8 @@ function key_bindings(){
         p_leg2.right --;
     });
     Mousetrap.bind('right', function() {
+        if(p_body.right == 1 && p_body.jet > 0)
+            return;
         var vel = 10;
         p_body.velx = vel;
         p_head.velx = vel;
@@ -621,7 +721,7 @@ function key_bindings(){
     });
 
     Mousetrap.bind('down', function() {
-        if(p_body.vel != 0)
+        if(p_body.vel != 0 || p_body.jet > 0)
             return;
         p_body.duck = true;
         p_head.duck = true;
@@ -638,7 +738,7 @@ function key_bindings(){
         {
             if(p_body.duck)
                 return;
-            var vel = 10;
+            var vel = 13;
             p_body.vel = vel;
             p_hand1.vel = vel;
             p_hand2.vel = vel;
@@ -648,7 +748,7 @@ function key_bindings(){
         }
         else if(p_body.vel == 0 && p_body.jumping_boot != 0)
         {
-            vel = 15;
+            vel = 18;
             p_body.vel = vel;
             p_head.vel = vel;
             p_hand1.vel = vel;

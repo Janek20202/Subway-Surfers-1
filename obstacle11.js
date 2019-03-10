@@ -4,7 +4,7 @@ let obstacle11 = class {
 	constructor(gl, pos, url) {
 		this.positionBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-		this.positions = makeCuboid(0, 0, 0, 6, 0.02, 5);
+		this.positions = makeCuboid(0, 0, 0, 6, 0.02, 12);
 
 		this.pos = pos;
         this.rotation = 0;

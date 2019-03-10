@@ -9,6 +9,7 @@ let player_body = class {
 		this.positions = makeCuboid(0, 0, 0, dim, dim, dim);
 
 		this.pos = pos;
+		this.rotation = 0;
 		this.vel = 0;
 		this.velx = 0;
 		this.jet = 0;
@@ -117,6 +118,11 @@ let player_body = class {
 			this.jet -= deltaTime;
 		else
 			this.jet = 0;
+
+		if(this.magnet > 0)
+			this.magnet -= deltaTime;
+		else
+			this.magnet = 0;
 		
 		if(this.jumping_boot > 0)
 			this.jumping_boot -= deltaTime;

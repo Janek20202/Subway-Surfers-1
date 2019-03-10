@@ -10,17 +10,26 @@
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script> 	</head>
 
 	<body>
-		<div class = "border border-danger w-75" style = "border-width: 3px !important;">
+		<!-- <div class="bg-info float-right">Controls</div> -->
+		<div class = "wrapper border border-danger w-75" style = "border-width: 3px !important; position: relative;">
 			<canvas id="glcanvas" width="1425" height="720"></canvas>
-			<h1>sldjflds</h1>
 		</div>
-		<br>
+		<div class = "controls bg-info" style = "position: absolute; top: 0; right: 0px; width: 480px; height: 733px">
+			<h1 class = "text-center display-2">Controls</h1>
+			<br>
+			<ul class = "list-unstyled">
+				<li class = "display-4"> <small><small>Right Arrow - move right</small></small></li>
+				<li class = "display-4"> <small><small>Left Arrow - move left</small></small></li>
+				<li class = "display-4"> <small><small>Space - jump</small></small></li>
+				<li class = "display-4"> <small><small>G - grayscale</small></small></li>
+			</ul>
+		</div>
 		<div class="progress">
 			<div class="progress-bar progress-bar-striped progress-bar-animated bg-success" id = "progress"></div>
 		</div> 
-		<kbd class = "lead display-3" id = "score"></kbd>
+	<kbd class = "lead display-3" id = "score"></kbd>
 		<h1 class = "bg-danger display-3" id = "over"></h1>
-	</body>
+</body>
 
 
 	<script src="./gl-matrix.js"></script>
@@ -48,6 +57,7 @@
 	<script src = "./dog_body.js"></script>
 	<script src = "./dog_legs.js"></script>
 	<script src = "./dog_tail.js"></script>
+	<script src = "./game_over.js"></script>
 	<script src="./main.js"></script>
 	
 </html>

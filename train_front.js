@@ -76,6 +76,10 @@ let train_front = class {
 
 	}
 
+	tick(deltaTime) {
+		this.pos[1] -= deltaTime * 15;
+	}
+
 	draw(gl, projectionMatrix, programInfo, deltaTime) {
 		const modelViewMatrix = mat4.create();
 		mat4.translate(

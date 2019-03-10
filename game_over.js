@@ -1,14 +1,13 @@
 /// <reference path="webgl.d.ts" />
 
-let train_side = class {
-	constructor(gl, pos, url, len, wid, ht) {
+let game_over = class {
+	constructor(gl, pos, url) {
 		this.positionBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
 		
-		this.positions = makeCuboid(-0.1, 0, 0, 0.2, len, ht);
+		this.positions = makeCuboid(0, 0, 0, 50, 50, 50);
 
 		this.pos = pos;
-		this.rotation = 0;
 
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions), gl.STATIC_DRAW);
 		
@@ -76,10 +75,6 @@ let train_side = class {
 
 	}
 
-	tick(deltaTime) {
-		this.pos[1] -= deltaTime * 15;
-	}
-
 	draw(gl, projectionMatrix, programInfo, deltaTime) {
 		const modelViewMatrix = mat4.create();
 		mat4.translate(
@@ -88,11 +83,6 @@ let train_side = class {
 			this.pos
 		);
 		
-		mat4.rotate(modelViewMatrix,
-			modelViewMatrix,
-			this.rotation,
-			[1, 1, 1]);
-
 		{
 			const numComponents = 3;
 			const type = gl.FLOAT;
