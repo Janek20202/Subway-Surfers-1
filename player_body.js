@@ -19,6 +19,9 @@ let player_body = class {
 		this.score = 0;
 		this.magnet = 0;
 		this.gravity = true;
+		this.rotation = 0;
+		this.duck = false;
+		this.won = false;
 
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions), gl.STATIC_DRAW);
 		
@@ -133,7 +136,8 @@ let player_body = class {
 			this.vel += accel * deltaTime;
 		}
 		else if(this.jet > 0)
-			this.pos[2] = 10;
+			if(this.pos[2] <= 10)
+				this.pos[2] += deltaTime * 8;
   }
 
 	draw(gl, projectionMatrix, programInfo, deltaTime) {
@@ -143,6 +147,31 @@ let player_body = class {
 			modelViewMatrix,
 			this.pos
 		);
+
+		if(this.jet > 0)
+		{
+			if(this.rotation < Math.PI/2)
+				this.rotation += 0.03;
+		}
+		else if(this.jet <= 0)
+		{
+			if(this.rotation > 0)
+				this.rotation -= 0.03;
+		}
+
+		if(this.duck)
+		{
+			if(this.rotation >= -Math.PI / 2)
+				this.rotation -= 0.03;
+			else
+				this.duck = false;
+		}
+		else
+		{
+			if(this.rotation < 0)
+				this.rotation += 0.03;
+		}
+		mat4.rotate(modelViewMatrix, modelViewMatrix, -this.rotation, [1, 0, 0]);
 		
 		{
 			const numComponents = 3;

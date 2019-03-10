@@ -16,7 +16,6 @@ let jumping_boot = class {
 			this.positions = drawCyl(0, 0, 0, this.n, 1.5*r/2, 1.5*r, len);
 
 		this.pos = pos;
-        this.rotation = 0;
 
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions), gl.STATIC_DRAW);
 		
@@ -65,7 +64,6 @@ let jumping_boot = class {
     }
     
 	draw(gl, projectionMatrix, programInfo, deltaTime) {
-        this.rotation += 0.1;
         const modelViewMatrix = mat4.create();
 		mat4.translate(
 			modelViewMatrix,

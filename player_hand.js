@@ -22,7 +22,9 @@ let player_hand = class {
 		this.slow = 10;
 		this.right = 0;
         this.dead = false;
-        this.leg = false;
+		this.leg = false;
+		this.gravity = true;
+		this.duck = false;
 
         if(flag1 != flag2)
             this.leg = true;
@@ -103,29 +105,39 @@ let player_hand = class {
             this.flag = !this.flag;
         if(this.rotation <= -Math.PI / 3)
 			this.flag = !this.flag;
-		
+		if(flag > 0)
+		{
+			if(p_body.slow > 0)
+			{
+				if(this.pos[1] < p_body.pos[1] - 5)
+					this.pos[1] += frame_speed/20;
+			}
+			else
+			{
+				if(this.pos[1] > p_body.pos[1] - 10)
+					this.pos[1] += 2 * frame_speed  * deltaTime - frame_speed/20;
+				else
+					this.pos[1] = p_body.pos[1] - 10;
+			}
+		}
 		if(flag == 1)
 		{
 			this.pos[0] = p_body.pos[0] - 0.7;
-    		this.pos[1] = p_body.pos[1] - 5;
 	    	this.pos[2] = p_body.pos[2] - 0.25;
 		}
 		else if(flag == 2)
 		{
 			this.pos[0] = p_body.pos[0] + 0.7;
-    		this.pos[1] = p_body.pos[1] - 5;
 	    	this.pos[2] = p_body.pos[2] - 0.25;
 		}
 		else if(flag == 3)
 		{
 			this.pos[0] = p_body.pos[0] - 1;
-			this.pos[1] = p_body.pos[1] - 5;
 			this.pos[2] = p_body.pos[2] - 0.6;
 		}
 		else if(flag == 4)
 		{
 			this.pos[0] = p_body.pos[0] + 1;
-			this.pos[1] = p_body.pos[1] - 5;
 			this.pos[2] = p_body.pos[2] - 0.6;
 		}
 		else if(flag == 0)
@@ -163,7 +175,7 @@ let player_hand = class {
 			else
 				this.jumping_boot = 0;
 
-			if(this.jet == 0)
+			if(this.jet == 0 && this.gravity)
 			{
 				var accel = -14;
 				var tmp = -2;
@@ -178,11 +190,14 @@ let player_hand = class {
 				this.pos[2] += this.vel * deltaTime + (accel * deltaTime * deltaTime) / 2;
 				this.vel += accel * deltaTime;
 			}
-			else
+			else if(this.jet > 0)
 			{
-				this.pos[2] = 10;
 				if(this.leg)
-					this.pos[2] = 9.5;
+					if(this.pos[2] <= 9.5)
+						this.pos[2] += deltaTime * 8;
+				else
+					if(this.pos[2] <= 10)
+						this.pos[2] += deltaTime * 8;
 			}
 		}
     }
@@ -194,6 +209,19 @@ let player_hand = class {
 			modelViewMatrix,
 			this.pos
         );
+
+		if(this.duck)
+		{
+			if(this.rotation >= -Math.PI / 2)
+				this.rotation -= 0.03;
+			else
+				this.duck = false;
+		}
+		else
+		{
+			if(this.rotation < 0)
+				this.rotation += 0.03;
+		}
         
         mat4.translate(modelViewMatrix, modelViewMatrix, [0, 0, 0.5]);
         mat4.rotate(modelViewMatrix, modelViewMatrix, this.rotation, [1, 0, 0]);

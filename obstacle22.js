@@ -19,14 +19,14 @@ let obstacle22 = class {
         const textureCoordinates = [];
         for(i=0;i<9*this.n;i++)
         {
-            textureCoordinates.push(0.0)
-            textureCoordinates.push(0.0)
-            textureCoordinates.push(1.0)
-            textureCoordinates.push(0.0)
-            textureCoordinates.push(1.0)
-            textureCoordinates.push(1.0)
-            textureCoordinates.push(0.0)
-            textureCoordinates.push(1.0)
+            textureCoordinates.push(0.0);
+            textureCoordinates.push(0.0);
+            textureCoordinates.push(1.0);
+            textureCoordinates.push(0.0);
+            textureCoordinates.push(1.0);
+            textureCoordinates.push(1.0);
+            textureCoordinates.push(0.0);
+            textureCoordinates.push(1.0);
         }
 
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates), gl.STATIC_DRAW);
@@ -65,11 +65,6 @@ let obstacle22 = class {
 			this.pos
 		);
 		
-		mat4.rotate(modelViewMatrix,
-			modelViewMatrix,
-			this.rotation,
-			[1, 1, 1]);
-
 		{
 			const numComponents = 3;
 			const type = gl.FLOAT;

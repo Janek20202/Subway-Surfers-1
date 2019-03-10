@@ -4,11 +4,24 @@
 		<meta charset="utf-8">
 		<title>WebGL Demo</title>
 		<link rel="stylesheet" href="../webgl.css" type="text/css">
-	</head>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script> 	</head>
 
 	<body>
-		<canvas id="glcanvas" width="1280" height="720"></canvas>
+		<div class = "border border-danger w-75" style = "border-width: 3px !important;">
+			<canvas id="glcanvas" width="1425" height="720"></canvas>
+			<h1>sldjflds</h1>
+		</div>
+		<br>
+		<div class="progress">
+			<div class="progress-bar progress-bar-striped progress-bar-animated bg-success" id = "progress"></div>
+		</div> 
+		<kbd class = "lead display-3" id = "score"></kbd>
+		<h1 class = "bg-danger display-3" id = "over"></h1>
 	</body>
+
 
 	<script src="./gl-matrix.js"></script>
 	<script src="./cubeprime.js"></script>

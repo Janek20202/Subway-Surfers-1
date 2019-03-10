@@ -10,6 +10,7 @@ let player_head = class {
         var ht = 0.25;
 		
         this.positions = drawCyl(0, 0, ht/2 + 0.5, this.n, rad, rad, ht);
+        this.positions = this.positions.concat(drawPol(this.n, 0, 0, rad, ht + 0.5));
 
 		this.pos = pos;
 		this.velx = 0;
@@ -20,7 +21,10 @@ let player_head = class {
 		this.slow = 10;
 		this.right = 0;
         this.dead = false;
-        this.leg = false;
+		this.leg = false;
+		this.gravity = true;
+		this.rotation = 0;
+		this.duck = false;
 
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions), gl.STATIC_DRAW);
 		
@@ -28,7 +32,7 @@ let player_head = class {
 		gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
 
         var textureCoordinates = [];
-        for(i=0;i<6*this.n;i++)
+        for(i=0;i<9*this.n;i++)
         {
             textureCoordinates.push(0.0)
             textureCoordinates.push(0.0)
@@ -52,7 +56,7 @@ let player_head = class {
 		// indices into the vertex array to specify each triangle's
 		// position.
 
-		const indices = fillSeqIndices(6*this.n);
+		const indices = fillSeqIndices(9*this.n);
 
 		// Now send the element array to GL
 
@@ -103,7 +107,7 @@ let player_head = class {
 		else
 			this.jumping_boot = 0;
 
-			if(this.jet == 0)
+		if(this.jet == 0 && this.gravity)
 		{
 			var accel = -14;
 			if(this.pos[2] < -2)
@@ -115,10 +119,9 @@ let player_head = class {
 			this.pos[2] += this.vel * deltaTime + (accel * deltaTime * deltaTime) / 2;
 			this.vel += accel * deltaTime;
 		}
-		else
-		{
-			this.pos[2] = 10;
-		}
+		else if(this.jet > 0)
+			if(this.pos[2] <= 10)
+				this.pos[2] += deltaTime * 8;
     }
 
 	draw(gl, projectionMatrix, programInfo, deltaTime) {
@@ -128,11 +131,30 @@ let player_head = class {
 			modelViewMatrix,
 			this.pos
 		);
-		
-		mat4.rotate(modelViewMatrix,
-			modelViewMatrix,
-			this.rotation,
-			[1, 1, 1]);
+
+		if(this.jet > 0)
+		{
+			if(this.rotation < Math.PI/2)
+				this.rotation += 0.03;
+		}
+		else if(this.jet <= 0)
+		{
+			if(this.rotation > 0)
+				this.rotation -= 0.03;
+		}
+		if(this.duck)
+		{
+			if(this.rotation >= -Math.PI / 2)
+				this.rotation -= 0.03;
+			else
+				this.duck = false;
+		}
+		else
+		{
+			if(this.rotation < 0)
+				this.rotation += 0.03;
+		}
+		mat4.rotate(modelViewMatrix, modelViewMatrix, -this.rotation, [1, 0, 0]);
 
 		{
 			const numComponents = 3;
@@ -188,7 +210,7 @@ let player_head = class {
 		// Tell WebGL which indices to use to index the vertices
 
 		{
-			const vertexCount = 6 * this.n;
+			const vertexCount = 9 * this.n;
 			const type = gl.UNSIGNED_SHORT;
 			const offset = 0;
 			gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);

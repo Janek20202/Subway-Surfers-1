@@ -31,7 +31,11 @@ var jetpacks = [];
 var jumping_boots = [];
 var magnets = [];
 
-var fr = 0.6;
+var fr = 0.5;
+var progress;
+var start = 5;
+var end = 200;
+var done = 0;
 var frame_speed = 5;
 var frame_accel = 0.5;
 var pause_status = false;
@@ -41,9 +45,10 @@ var train_wid = 3;
 var train_ht = 3;
 var groundPos = -3.0;
 var slowTime = 8;
+var light = 0;
 
 // going into the screen is y-axis, up the screen is z-axis
-function draw(gl, programInfo, deltaTime) {
+function draw(gl, programInfo, lightProgramInfo, deltaTime) {
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
 	gl.clearDepth(1.0);                 // Clear everything
 	gl.enable(gl.DEPTH_TEST);           // Enable depth testing
@@ -97,26 +102,32 @@ function draw(gl, programInfo, deltaTime) {
 
     p_body.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
     p_head.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
-    p_hand1.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
-    p_hand2.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
-    p_leg1.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
-    p_leg2.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
-    if(p_body.slow > 0)
+    if(p_body.jet <= 0 && !p_body.duck)
     {
-        o.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
-        o_head.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
-        o_hand1.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
-        o_hand2.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
-        o_leg1.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
-        o_leg2.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
+        p_hand1.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
+        p_hand2.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
+        p_leg1.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
+        p_leg2.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
     }
+    o.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
+    o_head.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
+    o_hand1.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
+    o_hand2.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
+    o_leg1.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
+    o_leg2.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
     d_body.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
     d_legs.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
     d_tail.draw(gl, viewProjectionMatrix, programInfo, deltaTime);
     for(i=0;i<t.length;i++)
         t[i].draw(gl, viewProjectionMatrix, programInfo, deltaTime);
     for(i=0;i<walls.length;i++)
-        walls[i].draw(gl, viewProjectionMatrix, programInfo, deltaTime);
+    {
+        if(light%60 < 30)
+            walls[i].draw(gl, viewProjectionMatrix, programInfo, deltaTime);
+        else
+            walls[i].draw(gl, viewProjectionMatrix, lightProgramInfo, deltaTime);
+    }
+    light++;
     for(i=0;i<train_fronts.length;i++)
         train_fronts[i].draw(gl, viewProjectionMatrix, programInfo, deltaTime);
     for(i=0;i<train_sides.length;i++)
@@ -190,27 +201,29 @@ function main() {
     // for(i=0;i<5;i++)
     //     train_tops.push(new train_top(gl, [0, 33+train_len/2 + i*train_len, groundPos + train_ht], 'train_top.jpeg', train_len, train_wid, train_ht));
 
-    coins.push(new coin(gl, [-4,15,-1], 'coin.jpeg'));
+    coins.push(new coin(gl, [-4,40,-1], 'coin.jpeg'));
 
 
     // obstacles11.push(new obstacle11(gl, [2, 30, groundPos + 2.5], 'obstacle11.jpeg'));
-    // obstacles12.push(new obstacle12(gl, [0, 30, groundPos + 2.0], 'obstacle12.jpg'));
-    // obstacles12.push(new obstacle12_base(gl, [-1.25, 30, groundPos + 1.0], 'obstacle12.jpg'));
-    // obstacles12.push(new obstacle12_base(gl, [1.25, 30, groundPos + 1.0], 'obstacle12.jpg'));
+    obstacles12.push(new obstacle12(gl, [0, 30, groundPos + 2.0], 'obstacle12.jpg'));
+    obstacles12.push(new obstacle12_base(gl, [-1.25, 30, groundPos + 1.0], 'obstacle12.jpg'));
+    obstacles12.push(new obstacle12_base(gl, [1.25, 30, groundPos + 1.0], 'obstacle12.jpg'));
     // obstacles21.push(new obstacle21(gl, [0, 40, groundPos + 0.15], 'obstacle21.jpeg'));
-    obstacles22.push(new obstacle22(gl, [0, 30, groundPos + 0.15], 'obstacle22.jpeg'));
-    // jetpacks.push(new jetpack(gl, [0, 10, groundPos + 0.5], 'jetpack.jpeg'));
-    // jumping_boots.push(new jumping_boot(gl, [-0.2, 10, groundPos + 0.5], 'jumping_boot.jpg', true));
-    // jumping_boots.push(new jumping_boot(gl, [0.12, 10, groundPos + 0.2], 'jumping_boot.jpg', false));
-    // magnets.push(new magnet(gl, [0, 5, groundPos + 0.8], 'magnet.jpeg'));
+    // obstacles22.push(new obstacle22(gl, [0, 30, groundPos + 0.15], 'obstacle22.jpeg'));
+    // jetpacks.push(new jetpack(gl, [0, 30, groundPos + 0.5], 'jetpack.jpeg'));
+    // jumping_boots.push(new jumping_boot(gl, [-0.2, 40, groundPos + 0.5], 'jumping_boot.jpg', true));
+    // jumping_boots.push(new jumping_boot(gl, [0.12, 40, groundPos + 0.2], 'jumping_boot.jpg', false));
+    magnets.push(new magnet(gl, [0, 40, groundPos + 0.8], 'magnet.jpeg'));
 
     // If we don't have a GL context, give up now
 	if (!gl) {
-	alert('Unable to initialize WebGL. Your browser or machine may not support it.');
-	return;
+    	alert('Unable to initialize WebGL. Your browser or machine may not support it.');
+	    return;
     }
     
-    programInfo = shader(gl);
+    programInfo = shader(gl, 0);
+    grayProgramInfo = shader(gl, 1);
+    lightProgramInfo = lighting_shader(gl);
 
 	// Vertex shader program
 
@@ -222,15 +235,46 @@ function main() {
 
 	// Draw the scene repeatedly
 	function render(now) {
+    progress = (p_body.pos[1] - start)*100 / end;
+    progress = Math.round(progress);
+    document.getElementById("progress").innerHTML = progress + " %";
+    document.getElementById("progress").setAttribute("style", "width:"+String(progress) + "%");
+
+    if(progress == 100)
+        p_body.won = true;
+        
+    if(p_body.dead || p_body.won)
+    {
+        if(done<=20 && p_body.dead)
+        {
+            o_hand1.pos[1] += 0.2;
+            o_hand2.pos[1] += 0.2;
+            o_leg1.pos[1] += 0.2;
+            o_leg2.pos[1] += 0.2;
+            o_head.pos[1] += 0.2;
+            o.pos[1] += 0.2;
+            done++;
+        }
+        frame_speed = 0;
+        frame_accel = 0;
+    }
 	now *= 0.001;  // convert to seconds
     const deltaTime = now - then;
-    key_bindings();
-    if(!pause_status)
+    if(!p_body.dead && !p_body.won)
+        key_bindings();
+    if(!pause_status && !p_body.dead && !p_body.won)
         tick(deltaTime);
     then = now;
-    console.log(p_body.dead);
+    document.getElementById("score").innerText = "Score : " +p_body.score;
+    if(p_body.dead)
+        document.getElementById("over").innerText = "Game Over";
+    if(p_body.won)
+        document.getElementById("over").innerText = "You Won";
 
-    draw(gl, programInfo, deltaTime);
+    if(grayscale)
+        draw(gl, grayProgramInfo, grayProgramInfo, deltaTime);
+    else
+        draw(gl, programInfo, lightProgramInfo, deltaTime);
     detect_collisions();
 
     requestAnimationFrame(render);
@@ -239,8 +283,8 @@ function main() {
 }
 
 function tick(deltaTime) {
-    o.tick(p_body);
-    o_head.tick(p_body);
+    o.tick(p_body, deltaTime);
+    o_head.tick(p_body, deltaTime);
     o_hand1.tick(deltaTime, 1, p_body);
     o_hand2.tick(deltaTime, 2, p_body);
     o_leg1.tick(deltaTime, 3, p_body);
@@ -262,14 +306,46 @@ function tick(deltaTime) {
     p_leg1.pos[1] += frame_speed * deltaTime + (frame_accel * deltaTime * deltaTime) / 2;
     p_leg2.pos[1] += frame_speed * deltaTime + (frame_accel * deltaTime * deltaTime) / 2;
     frame_speed += frame_accel * deltaTime;
+
+    for(i=0;i<coins.length;i++)
+        coins[i].tick(deltaTime);
+    if(p_body.magnet > 0)
+    {
+        for(i=0;i<coins.length;i++)
+        {
+            var d = dist(coins[i].pos, p_body.pos);
+            if(d <= 8)
+            {
+                coins[i].velx = 16*(p_body.pos[0] - coins[i].pos[0])/d;
+                coins[i].vely = 16*(p_body.pos[1] - coins[i].pos[1])/d;
+                coins[i].velz = 16*(p_body.pos[2] - coins[i].pos[2])/d;
+            }
+        }
+    }
+
+}
+
+function dist(pos1, pos2) {
+    x1 = pos1[0];
+    y1 = pos1[1];
+    z1 = pos1[2];
+    x2 = pos2[0];
+    y2 = pos2[1];
+    z2 = pos2[2];
+    return Math.sqrt(((x1-x2) * (x1-x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2)));
 }
 
 function detect_collisions() {
+
     plBx = createBoundingBox(p_body.pos[0], p_body.pos[1], p_body.pos[2] - 0.375, 1, 1, 2.25);
+    if(p_body.duck)
+    {
+        plBx = createBoundingBox(p_body.pos[0], -p_body.pos[2]+0.375, p_body.pos[1], 1, 2.25, 1);
+    }
 
     for(i=0;i<coins.length;i++)
     {
-        coinBx = createBoundingBox(coins[i].pos[0], coins[i].pos[1], coins[i].pos[2], 0.3, 0.01, 0.3);
+        coinBx = createBoundingBox(coins[i].pos[0], coins[i].pos[1], coins[i].pos[2], 0.3, 0.3, 0.3);
         if(detect_collision(plBx, coinBx))
         {
             p_body.score += 10;
@@ -463,6 +539,53 @@ function detect_collisions() {
                 p_body.dead = true;
         }
     }
+
+    for(i=0;i<jetpacks.length;i++)
+    {
+        jtBx = createBoundingBox(jetpacks[i].pos[0], jetpacks[i].pos[1], jetpacks[i].pos[2], 0.6, 0.6, 1.5);
+        if(detect_collision(plBx, jtBx))
+        {
+            p_body.jet = 10;
+            p_head.jet = 10;
+            p_hand1.jet = 10;
+            p_hand2.jet = 10;
+            p_leg1.jet = 10;
+            p_leg2.jet = 10;
+            p_body.slow = 0;
+            jetpacks.splice(i, 1);
+        }
+    }
+
+    for(i=0;i<jumping_boots.length;i++)
+    {
+        if(i%2==0)
+        {
+            jbBx = createBoundingBox(jumping_boots[i].pos[0], jumping_boots[i].pos[1], jumping_boots[i].pos[2], 0.3, 0.3, 0.75);
+            if(detect_collision(plBx, jbBx))
+            {
+                p_body.jumping_boot = 10;
+                jumping_boots.splice(i, 2);
+            }
+        }
+        else
+        {
+            jbBx = createBoundingBox(jumping_boots[i].pos[0], jumping_boots[i].pos[1], jumping_boots[i].pos[2], 0.75, 0.5, 0.5);
+            if(detect_collision(plBx, jbBx))
+            {
+                p_body.jumping_boot = 10;
+                jumping_boots.splice(i-1, 2);
+            }
+        }
+    }
+    for(i=0;i<magnets.length;i++)
+    {
+        mgBx = createBoundingBox(magnets[i].pos[0], magnets[i].pos[1], magnets[i].pos[2] - 0.35, 1, 0.2, 0.7);
+        if(detect_collision(plBx, mgBx))
+        {
+            p_body.magnet = 10;
+            magnets.splice(i, 1);
+        }
+    }
 }
 
 function key_bindings(){
@@ -497,11 +620,24 @@ function key_bindings(){
         p_leg2.right ++;
     });
 
+    Mousetrap.bind('down', function() {
+        if(p_body.vel != 0)
+            return;
+        p_body.duck = true;
+        p_head.duck = true;
+        p_hand1.duck = true;
+        p_hand2.duck = true;
+        p_leg1.duck = true;
+        p_leg2.duck = true;
+    });
+    
     Mousetrap.bind('g', function() {grayscale = !grayscale;});
   
     Mousetrap.bind('space', function() {
         if(p_body.vel == 0 && p_body.jumping_boot == 0)
         {
+            if(p_body.duck)
+                return;
             var vel = 10;
             p_body.vel = vel;
             p_hand1.vel = vel;
@@ -665,7 +801,75 @@ function drawCyl(cx, cy, cz, n, rad1, rad2, ht) {
     return pos;
 }
 
-function shader(gl) {
+function lighting_shader(gl) {
+    const vsSource = `
+    attribute vec4 aVertexPosition;
+    attribute vec3 aVertexNormal;
+    attribute vec2 aTextureCoord;
+
+    uniform mat4 uNormalMatrix;
+    uniform mat4 uModelViewMatrix;
+    uniform mat4 uProjectionMatrix;
+
+    varying highp vec2 vTextureCoord;
+    varying highp vec3 vLighting;
+
+    void main(void) {
+      gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+      vTextureCoord = aTextureCoord;
+
+      // Apply lighting effect
+
+      highp vec3 ambientLight = vec3(0.4, 0.4, 0.4);
+      highp vec3 directionalLightColor = vec3(1, 1, 1);
+      highp vec3 directionalVector = normalize(vec3(0.85, 0.8, 0.75));
+
+      highp vec4 transformedNormal = uNormalMatrix * vec4(aVertexNormal, 1.0);
+
+      highp float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
+      vLighting = ambientLight + (directionalLightColor * directional);
+    }
+  `;
+
+  const fsSource = `
+  varying highp vec2 vTextureCoord;
+  varying highp vec3 vLighting;
+
+  uniform sampler2D uSampler;
+
+  void main(void) {
+    highp vec4 texelColor = texture2D(uSampler, vTextureCoord);
+
+    gl_FragColor = vec4(texelColor.rgb * vLighting, texelColor.a);
+    }
+    `;
+
+	// Initialize a shader program; this is where all the lighting
+	// for the vertices and so forth is established.
+	const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+
+	// Collect all the info needed to use the shader program.
+	// Look up which attributes our shader program is using
+	// for aVertexPosition, aVevrtexColor and also
+	// look up uniform locations.
+    const programInfo = {
+        program: shaderProgram,
+        attribLocations: {
+          vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+          vertexNormal: gl.getAttribLocation(shaderProgram, 'aVertexNormal'),
+          textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord'),
+        },
+        uniformLocations: {
+          projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
+          modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+          normalMatrix: gl.getUniformLocation(shaderProgram, 'uNormalMatrix'),
+          uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+        },
+      };
+      return programInfo;
+}
+
+function shader(gl, flag) {
 	const vsSource = `
 	attribute vec4 aVertexPosition;
 	attribute vec2 aTextureCoord;
@@ -681,17 +885,33 @@ function shader(gl) {
 	}
 	`;
 
-	// Fragment shader program
+    // Fragment shader program
+    
+    let fsSource = `
+    varying highp vec2 vTextureCoord;
 
-	const fsSource = `
-	varying highp vec2 vTextureCoord;
+    uniform sampler2D uSampler;
 
-	uniform sampler2D uSampler;
+    void main(void) {
+        gl_FragColor = texture2D(uSampler, vTextureCoord);
+    }
+    `;
+    if(flag == 1)
+    {
+        fsSource = `
+        varying highp vec2 vTextureCoord;
 
-	void main(void) {
-		gl_FragColor = texture2D(uSampler, vTextureCoord);
-	}
-	`;
+        uniform sampler2D uSampler;
+
+        void main(void) {
+            gl_FragColor = texture2D(uSampler, vTextureCoord);
+            precision highp float;
+            vec4 color = texture2D(uSampler, vTextureCoord);
+            float gray = dot(color.rgb,vec3(0.299,0.587,0.114));
+            gl_FragColor = vec4(vec3(gray),1.0);
+              }
+        `;
+    }
 
 	// Initialize a shader program; this is where all the lighting
 	// for the vertices and so forth is established.
@@ -834,3 +1054,4 @@ function detect_collision(a, b) {
 		   (Math.abs(a.y - b.y) * 2 <= (a.breadth + b.breadth)) &&
 		   (Math.abs(a.z - b.z) * 2 <= (a.height + b.height));
 }
+

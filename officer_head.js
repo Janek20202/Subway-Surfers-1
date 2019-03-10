@@ -58,10 +58,21 @@ let officer_head = class {
 
 	}
 	
-	tick(p) {
+	tick(p, deltaTime) {
 		this.pos[0] = p.pos[0];
-		this.pos[1] = p.pos[1] - 5;
 		this.pos[2] = p.pos[2] + 0.75;
+		if(p.slow > 0)
+		{
+			if(this.pos[1] < p.pos[1] - 5)
+				this.pos[1] += frame_speed/20;
+		}
+		else
+		{
+			if(this.pos[1] > p.pos[1] - 10)
+				this.pos[1] -= 2*frame_speed * deltaTime - frame_speed/20;
+			else
+				this.pos[1] = p.pos[1] - 10;
+		}
 	}
     
 	draw(gl, projectionMatrix, programInfo, deltaTime) {
@@ -124,7 +135,6 @@ let officer_head = class {
 		gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
 
         // Tell WebGL which indices to use to index the vertices
-        // console.log("KFLDJ")
 
 		{
 			const vertexCount = 36;

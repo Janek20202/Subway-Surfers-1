@@ -9,7 +9,10 @@ let coin = class {
         this.positions = drawPol(this.n, 0, 0, 0.3, 0);
 
 		this.pos = pos;
-        this.rotation = 0;
+		this.rotation = 0;
+		this.velx = 0;
+		this.vely = 0;
+		this.velz = 0;
 
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions), gl.STATIC_DRAW);
 		
@@ -56,7 +59,13 @@ let coin = class {
 		this.texture = loadTexture(gl, url);
 
     }
-    
+	
+	tick(deltaTime) {
+		this.pos[0] += deltaTime * this.velx;
+		this.pos[1] += deltaTime * this.vely;
+		this.pos[2] += deltaTime * this.velz;
+	}
+
 	draw(gl, projectionMatrix, programInfo, deltaTime) {
         this.rotation += 0.1
 		const modelViewMatrix = mat4.create();
